@@ -13,10 +13,12 @@ export const AccountSchema = new Schema(
     bookingBalance: {
       type: Number,
       required: true,
+      default: 0,
     },
     availableBalance: {
       type: Number,
       required: true,
+      default: 0,
     },
     accountNumber: {
       type: String,
@@ -41,6 +43,7 @@ export const AccountSchema = new Schema(
     accesses: {
       type: Object,
       required: true,
+      default: {},
     },
   },
   { versionKey: false },

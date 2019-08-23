@@ -19,6 +19,10 @@ export const ApplicationSchema = new Schema(
       required: true,
       default: [],
     },
+    pubkey: {
+      type: String,
+      required: true,
+    },
   },
   { versionKey: false },
 );

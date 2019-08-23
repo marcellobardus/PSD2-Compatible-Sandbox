@@ -26,4 +26,20 @@ export class CustomersService {
   async getByClientID(clientID: string): Promise<CustomerInterface> {
     return await this.customerModel.findOne({ clientID });
   }
+
+  async getByNameAndSurname(
+    name: string,
+    surname: string,
+  ): Promise<CustomerInterface> {
+    return await this.customerModel.findOne({ name, surname });
+  }
+
+  async attachAccount(clientID: string, accountID: number) {
+    await this.customerModel.updateOne(
+      { clientID },
+      {
+        $push: { accountsIds: accountID },
+      },
+    );
+  }
 }

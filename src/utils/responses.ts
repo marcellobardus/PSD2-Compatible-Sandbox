@@ -9,3 +9,18 @@ export class AuthorizationError {
 
   constructor(private readonly message: string) {}
 }
+
+export class PayloadError {
+  @ApiModelProperty()
+  readonly code = 400;
+
+  @ApiModelProperty()
+  readonly error = true;
+
+  constructor(private readonly message: string) {}
+}
+
+export class NoErrorResponse {
+  @ApiModelProperty()
+  readonly error: boolean;
+}
