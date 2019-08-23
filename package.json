@@ -24,15 +24,20 @@
     "@nestjs/core": "^6.0.0",
     "@nestjs/platform-express": "^6.0.0",
     "@nestjs/swagger": "^3.1.0",
+    "@types/crypto-js": "^3.1.43",
     "@types/elliptic": "^6.4.9",
     "@types/mongoose": "^5.5.13",
+    "class-transformer": "^0.2.3",
     "class-validator": "^0.10.0",
+    "crypto-js": "^3.1.9-1",
     "elliptic": "^6.5.0",
+    "merkletreejs": "^0.1.7",
     "mongoose": "^5.6.10",
     "reflect-metadata": "^0.1.12",
     "rimraf": "^2.6.2",
     "rxjs": "^6.3.3",
-    "sha2": "^1.0.2"
+    "sha2": "^1.0.2",
+    "swagger-ui-express": "^4.0.7"
   },
   "devDependencies": {
     "@nestjs/testing": "^6.0.0",

@@ -1,0 +1,24 @@
+version: '3'
+services:
+  psd2_sandbox:
+    build: .
+    command: 'nodemon .'
+    depends_on:
+      - psd2mock
+    ports:
+      - '8089:8089'
+    networks:
+      - backend
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    env_file:
+      - .env
+  psd2mock:
+    image: mongo
+    ports:
+      - '27017:27017'
+    networks:
+      - backend
+networks:
+  backend:
