@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Headers } from '@nestjs/common';
+import { Controller, Post, Body, Headers, Get, Param } from '@nestjs/common';
 import { ApplicationsService } from './applications.service';
 import { CryptographyService } from 'src/services/cryptography.service';
 import { ApiUseTags, ApiResponse } from '@nestjs/swagger';
@@ -13,11 +13,16 @@ import {
 } from 'src/utils/responses';
 
 import { SHA256, enc } from 'crypto-js';
-import { ApplicationSignupDro } from './applications.dros';
+import {
+  ApplicationSignupDro,
+  AuthorizeApplicationAsCustomerDro,
+  ClaimAPIKeyDro,
+} from './applications.dros';
 import { AccountsService } from '../accounts/accounts.service';
 import { CustomersService } from '../customers/customers.service';
 
 import { includes } from 'lodash';
+import { randomBytes } from 'crypto';
 
 @ApiUseTags('applications')
 @Controller('applications')
@@ -62,7 +67,7 @@ export class ApplicationsController {
   @Post('authorize-application-as-customer')
   @ApiResponse({ status: 401, type: AuthorizationError })
   @ApiResponse({ status: 400, type: PayloadError })
-  @ApiResponse({ status: 201, type: NoErrorResponse })
+  @ApiResponse({ status: 201, type: AuthorizeApplicationAsCustomerDro })
   async authorizeApplicationAsCustomer(
     @Headers('session') session: string,
     @Body()
@@ -105,6 +110,56 @@ export class ApplicationsController {
       authorizeApplicationAsCustomerDto.accessType,
     );
 
-    return { error: false };
+    const tmpCode = randomBytes(4)
+      .toString()
+      .toUpperCase();
+
+    await this.applicationsService.setApplicationAPIKeyClaimTmpCode(
+      application.appID,
+      tmpCode,
+    );
+    return { error: false, tmpCode };
+  }
+
+  @Get('claim-api-key/:tmpCode')
+  @ApiResponse({ status: 200, type: ClaimAPIKeyDro })
+  @ApiResponse({ status: 400, type: PayloadError })
+  @ApiResponse({ status: 401, type: AuthorizationError })
+  async claimAPIKey(
+    @Headers('signature') signature: string,
+    @Headers('appID') appID: string,
+    @Param('tmpCode') tmpCode: string,
+  ) {
+    const application = await this.applicationsService.getApplicationByID(
+      appID,
+    );
+
+    if (!application) {
+      return new PayloadError('Invalid application ID');
+    }
+
+    const isSignatureValid = this.cryptographyService.isSignatureValid(
+      application.pubkey,
+      tmpCode,
+      signature,
+    );
+
+    if (!isSignatureValid) {
+      return new AuthorizationError('Signature mismatch');
+    }
+
+    const isTmpCodeValid = tmpCode === application.APIKeyClaimTmpCode;
+
+    if (!isTmpCodeValid) {
+      return new AuthorizationError('Invalid api key claim code');
+    }
+
+    const APIKEY = randomBytes(6)
+      .toString()
+      .toUpperCase();
+
+    await this.applicationsService.setAPIKey(application.appID, APIKEY);
+
+    return { error: false, ApiKey: APIKEY };
   }
 }

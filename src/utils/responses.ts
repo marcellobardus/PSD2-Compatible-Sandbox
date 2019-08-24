@@ -2,12 +2,17 @@ import { ApiModelProperty } from '@nestjs/swagger';
 
 export class AuthorizationError {
   @ApiModelProperty()
-  readonly code = 401;
+  readonly code: number = 401;
 
   @ApiModelProperty()
-  readonly error = true;
+  readonly error: boolean = true;
 
-  constructor(private readonly message: string) {}
+  @ApiModelProperty()
+  readonly message: string;
+
+  constructor(message: string) {
+    this.message = message;
+  }
 }
 
 export class PayloadError {
@@ -17,7 +22,12 @@ export class PayloadError {
   @ApiModelProperty()
   readonly error = true;
 
-  constructor(private readonly message: string) {}
+  @ApiModelProperty()
+  readonly message: string;
+
+  constructor(message: string) {
+    this.message = message;
+  }
 }
 
 export class NoErrorResponse {
