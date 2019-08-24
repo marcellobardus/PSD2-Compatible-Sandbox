@@ -39,6 +39,8 @@ async function bootstrap() {
   );
   SwaggerModule.setup('/docs', app, applicationsDocument);
 
+  app.enableCors();
+
   await app.listen(8089);
 }
 bootstrap();

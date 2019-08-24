@@ -3,8 +3,6 @@ import { CUSTOMER_SCHEMA_PROVIDER } from 'src/utils/constants';
 import { Model } from 'mongoose';
 import { CustomerInterface } from './customer.interface';
 
-import { SHA256 } from 'sha2';
-
 @Injectable()
 export class CustomersService {
   constructor(
@@ -19,7 +17,6 @@ export class CustomersService {
     clientID: string;
     passwordHash: string;
   }) {
-    rawCustomer.passwordHash = SHA256(rawCustomer.passwordHash).toString('hex');
     await new this.customerModel(rawCustomer).save();
   }
 

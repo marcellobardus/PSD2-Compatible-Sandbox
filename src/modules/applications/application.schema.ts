@@ -11,7 +11,7 @@ export const ApplicationSchema = new Schema(
       required: false,
     },
     appID: {
-      type: Number,
+      type: String,
       required: true,
     },
     hasAccessToAccountsIDs: {

@@ -16,8 +16,6 @@ services:
       - .env
   psd2mock:
     image: mongo
-    ports:
-      - '27017:27017'
     networks:
       - backend
 networks:

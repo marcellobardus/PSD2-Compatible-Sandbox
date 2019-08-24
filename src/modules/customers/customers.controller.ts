@@ -83,7 +83,8 @@ export class CustomersController {
     }
 
     const isPasswordCorrect =
-      loginCustomerDto.passwordHash === customer.passwordHash;
+      SHA256(loginCustomerDto.passwordHash).toString(enc.Hex) ===
+      customer.passwordHash;
 
     if (!isPasswordCorrect) {
       return new AuthorizationError('Invalid credentials');
