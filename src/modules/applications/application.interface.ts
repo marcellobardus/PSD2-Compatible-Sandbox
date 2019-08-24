@@ -5,4 +5,5 @@ export interface ApplicationInterface extends Document {
   readonly appDescription: string;
   readonly appID: string;
   readonly hasAccessToAccountsIDs: number[];
+  readonly pubkey: string;
 }

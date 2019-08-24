@@ -7,3 +7,14 @@ export class CustomerRegisteredDro {
   @ApiModelProperty()
   readonly customerID: string;
 }
+
+export class CustomerLoginDro {
+  @ApiModelProperty()
+  readonly error: boolean;
+
+  @ApiModelProperty()
+  readonly session: string;
+
+  @ApiModelProperty()
+  readonly expirationTime: number;
+}

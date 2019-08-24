@@ -2,16 +2,20 @@ import { Controller, Post, Body, Headers } from '@nestjs/common';
 import { ApiUseTags, ApiResponse } from '@nestjs/swagger';
 
 import { CustomersService } from './customers.service';
-import { RegisterCustomerDto } from './customers.dtos';
+import { RegisterCustomerDto, LoginCustomerDto } from './customers.dtos';
 import { CryptographyService } from 'src/services/cryptography.service';
 import { ConfigService } from 'src/services/config.service';
-import { AuthorizationError } from 'src/utils/responses';
+import {
+  AuthorizationError,
+  PayloadError,
+  NoErrorResponse,
+} from 'src/utils/responses';
 import { ObjectHasher } from 'src/utils/hash.object';
 
 import { randomBytes } from 'crypto';
 
 import { SHA256, enc } from 'crypto-js';
-import { CustomerRegisteredDro } from './customers.dros';
+import { CustomerRegisteredDro, CustomerLoginDro } from './customers.dros';
 
 @ApiUseTags('customers')
 @Controller('customers')
@@ -63,5 +67,40 @@ export class CustomersController {
     });
 
     return { error: false, customerID: clientID };
+  }
+
+  @Post('login')
+  @ApiResponse({ status: 401, type: AuthorizationError })
+  @ApiResponse({ status: 400, type: PayloadError })
+  @ApiResponse({ status: 201, type: CustomerLoginDro })
+  async login(@Body() loginCustomerDto: LoginCustomerDto) {
+    const customer = await this.customersService.getByClientID(
+      loginCustomerDto.clientID,
+    );
+
+    if (!customer) {
+      return new PayloadError('Customer with the given ID does not exist');
+    }
+
+    const isPasswordCorrect =
+      loginCustomerDto.passwordHash === customer.passwordHash;
+
+    if (!isPasswordCorrect) {
+      return new AuthorizationError('Invalid credentials');
+    }
+
+    const session = SHA256(randomBytes(64).toString()).toString(enc.Hex);
+
+    const sessionExpirationTime =
+      Date.now() / 1000 +
+      Number(this.configService.config.sessionExpirationAfterMinutes) * 60;
+
+    await this.customersService.setSession(
+      customer.clientID,
+      session,
+      sessionExpirationTime,
+    );
+
+    return { error: false, session, expirationTime: sessionExpirationTime };
   }
 }

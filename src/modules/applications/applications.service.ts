@@ -22,4 +22,17 @@ export class ApplicationsService {
   async getAll(): Promise<ApplicationInterface[]> {
     return await this.applicationModel.find({});
   }
+
+  async getApplicationByID(appID: string): Promise<ApplicationInterface> {
+    return await this.applicationModel.findOne({ appID });
+  }
+
+  async pushNewAccess(appID: string, accountID: number) {
+    await this.applicationModel.updateOne(
+      { appID },
+      {
+        $push: { hasAccessToAccountsIDs: accountID },
+      },
+    );
+  }
 }

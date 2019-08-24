@@ -8,6 +8,7 @@ export class ConfigService {
     address: string;
     masterPublicKey: string;
     branchCode: string;
+    sessionExpirationAfterMinutes: string;
   };
   constructor() {
     this.config = JSON.parse(

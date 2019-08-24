@@ -42,4 +42,36 @@ export class CustomersService {
       },
     );
   }
+
+  async setSession(
+    clientID: string,
+    session: string,
+    sessionExpirationTime: number,
+  ) {
+    await this.customerModel.updateOne(
+      {
+        clientID,
+      },
+      {
+        $set: {
+          session,
+          sessionExpirationTime,
+        },
+      },
+    );
+  }
+
+  async getCustomerBySession(session: string): Promise<CustomerInterface> {
+    const customer = await this.customerModel.findOne({ session });
+
+    if (!customer) {
+      return null;
+    }
+
+    if (customer.sessionExpirationTime < Date.now() / 1000) {
+      return null;
+    }
+
+    return customer;
+  }
 }

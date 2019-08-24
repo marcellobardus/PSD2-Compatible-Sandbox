@@ -2,17 +2,30 @@ import { Controller, Post, Body, Headers } from '@nestjs/common';
 import { ApplicationsService } from './applications.service';
 import { CryptographyService } from 'src/services/cryptography.service';
 import { ApiUseTags, ApiResponse } from '@nestjs/swagger';
-import { ApplicationSignupDto } from './applications.dtos';
-import { PayloadError } from 'src/utils/responses';
+import {
+  ApplicationSignupDto,
+  AuthorizeApplicationAsCustomerDto,
+} from './applications.dtos';
+import {
+  PayloadError,
+  AuthorizationError,
+  NoErrorResponse,
+} from 'src/utils/responses';
 
 import { SHA256, enc } from 'crypto-js';
 import { ApplicationSignupDro } from './applications.dros';
+import { AccountsService } from '../accounts/accounts.service';
+import { CustomersService } from '../customers/customers.service';
+
+import { includes } from 'lodash';
 
 @ApiUseTags('applications')
 @Controller('applications')
 export class ApplicationsController {
   constructor(
     private readonly applicationsService: ApplicationsService,
+    private readonly customersService: CustomersService,
+    private readonly accountsService: AccountsService,
     private readonly cryptographyService: CryptographyService,
   ) {}
 
@@ -44,5 +57,54 @@ export class ApplicationsController {
     });
 
     return { error: false, appID };
+  }
+
+  @Post('authorize-application-as-customer')
+  @ApiResponse({ status: 401, type: AuthorizationError })
+  @ApiResponse({ status: 400, type: PayloadError })
+  @ApiResponse({ status: 201, type: NoErrorResponse })
+  async authorizeApplicationAsCustomer(
+    @Headers('session') session: string,
+    @Body()
+    authorizeApplicationAsCustomerDto: AuthorizeApplicationAsCustomerDto,
+  ) {
+    const customer = await this.customersService.getCustomerBySession(session);
+
+    if (!customer) {
+      return new AuthorizationError('Invalid session');
+    }
+
+    const isCustomerOwnerOfAccount = includes(
+      customer.accountsIds,
+      authorizeApplicationAsCustomerDto.accountID,
+    );
+
+    if (!isCustomerOwnerOfAccount) {
+      return new AuthorizationError(
+        "Invalid account ID to authorize an application to use it you need to be it's owner",
+      );
+    }
+
+    const application = await this.applicationsService.getApplicationByID(
+      authorizeApplicationAsCustomerDto.appID,
+    );
+
+    if (!application) {
+      return new PayloadError('Application with the given ID does not exist');
+    }
+
+    await this.applicationsService.pushNewAccess(
+      application.appID,
+      authorizeApplicationAsCustomerDto.accountID,
+    );
+
+    await this.accountsService.updateAccountAccesses(
+      authorizeApplicationAsCustomerDto.accountID,
+      application.appID,
+      Date.now() / 1000,
+      authorizeApplicationAsCustomerDto.accessType,
+    );
+
+    return { error: false };
   }
 }

@@ -27,6 +27,12 @@ export const CustomersSchema = new Schema(
       type: String,
       required: true,
     },
+    session: {
+      type: String,
+    },
+    sessionExpirationTime: {
+      type: Number,
+    },
   },
   { versionKey: false },
 );

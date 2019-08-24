@@ -27,4 +27,25 @@ export class AccountsService {
   async getAll(): Promise<AccountInterface[]> {
     return this.accountModel.find({});
   }
+
+  async getAccountByID(accountID: number): Promise<AccountInterface> {
+    return await this.accountModel.findOne({ accountID });
+  }
+
+  async updateAccountAccesses(
+    accountID: number,
+    appID: string,
+    authorizationDate: number,
+    accessType: string,
+  ) {
+    const key = 'accesses.' + appID;
+    await this.accountModel.updateOne(
+      { accountID },
+      {
+        $set: {
+          [key]: { accessType, authorizationDate },
+        },
+      },
+    );
+  }
 }

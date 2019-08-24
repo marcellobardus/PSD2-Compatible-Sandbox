@@ -9,4 +9,7 @@ export interface CustomerInterface extends Document {
 
   readonly clientID: string;
   readonly accountsIds: number[];
+
+  readonly session: string;
+  readonly sessionExpirationTime: number;
 }

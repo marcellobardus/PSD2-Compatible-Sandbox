@@ -19,3 +19,13 @@ export class RegisterCustomerDto {
   @IsNotEmpty()
   readonly passwordHash: string;
 }
+
+export class LoginCustomerDto {
+  @ApiModelProperty()
+  @IsNotEmpty()
+  readonly clientID: string;
+
+  @ApiModelProperty()
+  @IsNotEmpty()
+  readonly passwordHash: string;
+}
