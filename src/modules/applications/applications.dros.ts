@@ -14,6 +14,9 @@ export class AuthorizeApplicationAsCustomerDro {
 
   @ApiModelProperty()
   readonly tmpCode: string;
+
+  @ApiModelProperty()
+  readonly accountID: number;
 }
 
 export class ClaimAPIKeyDro {

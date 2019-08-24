@@ -35,26 +35,4 @@ export class ApplicationsService {
       },
     );
   }
-
-  async setApplicationAPIKeyClaimTmpCode(appID: string, tmpCode: string) {
-    await this.applicationModel.updateOne(
-      { appID },
-      {
-        $set: {
-          APIKeyClaimTmpCode: tmpCode,
-        },
-      },
-    );
-  }
-
-  async setAPIKey(appID: string, ApiKey: string) {
-    await this.applicationModel.updateOne(
-      {
-        appID,
-      },
-      {
-        $set: { APIKey: ApiKey },
-      },
-    );
-  }
 }

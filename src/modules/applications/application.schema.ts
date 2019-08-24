@@ -23,12 +23,6 @@ export const ApplicationSchema = new Schema(
       type: String,
       required: true,
     },
-    APIKeyClaimTmpCode: {
-      type: String,
-    },
-    APIKey: {
-      type: String,
-    },
   },
   { versionKey: false },
 );

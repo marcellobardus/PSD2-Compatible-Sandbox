@@ -6,8 +6,4 @@ export interface ApplicationInterface extends Document {
   readonly appID: string;
   readonly hasAccessToAccountsIDs: number[];
   readonly pubkey: string;
-
-  readonly APIKeyClaimTmpCode: string;
-
-  readonly APIKey: string;
 }

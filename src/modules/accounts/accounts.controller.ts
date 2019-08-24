@@ -1,4 +1,4 @@
-import { Controller, Post, Headers, Body } from '@nestjs/common';
+import { Controller, Post, Headers, Body, Get } from '@nestjs/common';
 import { AccountsService } from './accounts.service';
 import { CryptographyService } from 'src/services/cryptography.service';
 import { ConfigService } from 'src/services/config.service';
@@ -12,6 +12,8 @@ import {
 import { ObjectHasher } from 'src/utils/hash.object';
 import { CustomersService } from '../customers/customers.service';
 import { CustomerInterface } from '../customers/customer.interface';
+import { AccountInterface } from './account.interface';
+import { GetCustomerAccountsDro } from './accounts.dros';
 
 @ApiUseTags('accounts')
 @Controller('accounts')
@@ -98,5 +100,33 @@ export class AccountsController {
       accountTypeName: registerAccountDto.accountTypeName,
     });
     return { error: false };
+  }
+
+  @Get('get-all')
+  @ApiResponse({ status: 401, type: AuthorizationError })
+  @ApiResponse({ status: 200, type: GetCustomerAccountsDro })
+  async getAllAccounts(@Headers('session') session: string) {
+    const customer = await this.customersService.getCustomerBySession(session);
+
+    if (!customer) {
+      return new AuthorizationError('Invalid session');
+    }
+
+    let accounts: Array<AccountInterface> = [];
+
+    for (const accountId of customer.accountsIds) {
+      const account = await this.accountsService.getAccountByID(accountId);
+
+      const allowedApplications = Object.keys(account.accesses);
+
+      for (const applicationName of allowedApplications) {
+        delete account.accesses[applicationName].apiKey;
+        delete account.accesses[applicationName].APIKeyClaimTmpCode;
+      }
+
+      accounts.push(account);
+    }
+
+    return { error: false, accounts };
   }
 }

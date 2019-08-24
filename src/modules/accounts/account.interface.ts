@@ -10,6 +10,8 @@ export interface Access {
   [appID: string]: {
     authorizationDate: number;
     accessType: AccessType;
+    apiKey: string;
+    APIKeyClaimTmpCode: string;
   };
 }
 

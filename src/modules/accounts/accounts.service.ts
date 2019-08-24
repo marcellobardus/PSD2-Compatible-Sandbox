@@ -48,4 +48,36 @@ export class AccountsService {
       },
     );
   }
+
+  async setApplicationAccountAPIKey(
+    accountID: number,
+    appID: string,
+    apiKey: string,
+  ) {
+    const key = 'accesses.' + appID;
+    await this.accountModel.updateOne(
+      { accountID },
+      {
+        $set: {
+          [key]: { apiKey },
+        },
+      },
+    );
+  }
+
+  async setApplicationAccountTmpKey(
+    accountID: number,
+    appID: string,
+    tmpCode: string,
+  ) {
+    const key = 'accesses.' + appID;
+    await this.accountModel.updateOne(
+      { accountID },
+      {
+        $set: {
+          [key]: { APIKeyClaimTmpCode: tmpCode },
+        },
+      },
+    );
+  }
 }

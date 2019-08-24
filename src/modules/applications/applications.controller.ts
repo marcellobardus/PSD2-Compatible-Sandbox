@@ -114,11 +114,16 @@ export class ApplicationsController {
       .toString()
       .toUpperCase();
 
-    await this.applicationsService.setApplicationAPIKeyClaimTmpCode(
+    await this.accountsService.setApplicationAccountTmpKey(
+      authorizeApplicationAsCustomerDto.accountID,
       application.appID,
       tmpCode,
     );
-    return { error: false, tmpCode };
+    return {
+      error: false,
+      tmpCode,
+      accountID: authorizeApplicationAsCustomerDto.accountID,
+    };
   }
 
   @Get('claim-api-key/:tmpCode')
@@ -128,6 +133,7 @@ export class ApplicationsController {
   async claimAPIKey(
     @Headers('signature') signature: string,
     @Headers('appID') appID: string,
+    @Headers('accountID') accountID: number,
     @Param('tmpCode') tmpCode: string,
   ) {
     const application = await this.applicationsService.getApplicationByID(
@@ -148,7 +154,14 @@ export class ApplicationsController {
       return new AuthorizationError('Signature mismatch');
     }
 
-    const isTmpCodeValid = tmpCode === application.APIKeyClaimTmpCode;
+    const account = await this.accountsService.getAccountByID(accountID);
+
+    if (!account) {
+      return new PayloadError('Invalid Account ID');
+    }
+
+    const isTmpCodeValid =
+      tmpCode === account.accesses[appID].APIKeyClaimTmpCode;
 
     if (!isTmpCodeValid) {
       return new AuthorizationError('Invalid api key claim code');
@@ -158,7 +171,11 @@ export class ApplicationsController {
       .toString()
       .toUpperCase();
 
-    await this.applicationsService.setAPIKey(application.appID, APIKEY);
+    await this.accountsService.setApplicationAccountAPIKey(
+      accountID,
+      application.appID,
+      APIKEY,
+    );
 
     return { error: false, ApiKey: APIKEY };
   }
