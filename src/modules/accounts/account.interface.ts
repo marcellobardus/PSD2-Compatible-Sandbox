@@ -10,7 +10,7 @@ export interface Access {
   [appID: string]: {
     authorizationDate: number;
     accessType: AccessType;
-    apiKey: string;
+    apiKey: string | null;
     APIKeyClaimTmpCode: string;
   };
 }
@@ -33,5 +33,5 @@ export interface AccountInterface extends Document {
 
   // Internal properties
 
-  readonly accesses: Access;
+  accesses: Access;
 }

@@ -31,3 +31,11 @@ export class RegisterAccountDto {
   @ApiModelProperty({ required: false })
   readonly customerSurname: string;
 }
+
+export class SetAccountBalaceDto {
+  @ApiModelProperty()
+  readonly accountID: number;
+
+  @ApiModelProperty()
+  readonly newBalance: number;
+}

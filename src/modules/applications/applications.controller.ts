@@ -6,11 +6,7 @@ import {
   ApplicationSignupDto,
   AuthorizeApplicationAsCustomerDto,
 } from './applications.dtos';
-import {
-  PayloadError,
-  AuthorizationError,
-  NoErrorResponse,
-} from 'src/utils/responses';
+import { PayloadError, AuthorizationError } from 'src/utils/responses';
 
 import { SHA256, enc } from 'crypto-js';
 import {
@@ -32,7 +28,9 @@ export class ApplicationsController {
     private readonly customersService: CustomersService,
     private readonly accountsService: AccountsService,
     private readonly cryptographyService: CryptographyService,
-  ) {}
+  ) {
+    this.applicationsService.getAll().then(console.log);
+  }
 
   @Post('signup')
   @ApiResponse({ status: 400, type: PayloadError })
@@ -98,27 +96,39 @@ export class ApplicationsController {
       return new PayloadError('Application with the given ID does not exist');
     }
 
-    await this.applicationsService.pushNewAccess(
-      application.appID,
+    if (
+      !includes(
+        application.hasAccessToAccountsIDs,
+        authorizeApplicationAsCustomerDto.accountID,
+      )
+    ) {
+      await this.applicationsService.pushNewAccess(
+        application.appID,
+        authorizeApplicationAsCustomerDto.accountID,
+      );
+    }
+
+    const account = await this.accountsService.getAccountByID(
       authorizeApplicationAsCustomerDto.accountID,
     );
+    let newAccesses = account.accesses;
+
+    const tmpCode = randomBytes(6)
+      .toString('hex')
+      .toUpperCase();
+
+    newAccesses[application.appID] = {
+      authorizationDate: Date.now() / 1000,
+      accessType: authorizeApplicationAsCustomerDto.accessType,
+      APIKeyClaimTmpCode: tmpCode,
+      apiKey: null,
+    };
 
     await this.accountsService.updateAccountAccesses(
       authorizeApplicationAsCustomerDto.accountID,
-      application.appID,
-      Date.now() / 1000,
-      authorizeApplicationAsCustomerDto.accessType,
+      newAccesses,
     );
 
-    const tmpCode = randomBytes(4)
-      .toString()
-      .toUpperCase();
-
-    await this.accountsService.setApplicationAccountTmpKey(
-      authorizeApplicationAsCustomerDto.accountID,
-      application.appID,
-      tmpCode,
-    );
     return {
       error: false,
       tmpCode,
@@ -132,9 +142,10 @@ export class ApplicationsController {
   @ApiResponse({ status: 401, type: AuthorizationError })
   async claimAPIKey(
     @Headers('signature') signature: string,
-    @Headers('appID') appID: string,
-    @Headers('accountID') accountID: number,
+    @Headers('appid') appID: string,
+    @Headers('accountid') accountID: number,
     @Param('tmpCode') tmpCode: string,
+    @Headers() headers: any,
   ) {
     const application = await this.applicationsService.getApplicationByID(
       appID,
@@ -155,6 +166,7 @@ export class ApplicationsController {
     }
 
     const account = await this.accountsService.getAccountByID(accountID);
+    console.log(headers);
 
     if (!account) {
       return new PayloadError('Invalid Account ID');
@@ -171,12 +183,12 @@ export class ApplicationsController {
       .toString()
       .toUpperCase();
 
-    await this.accountsService.setApplicationAccountAPIKey(
-      accountID,
-      application.appID,
-      APIKEY,
-    );
+    let newAccesses = account.accesses;
 
-    return { error: false, ApiKey: APIKEY };
+    newAccesses[application.appID].apiKey = APIKEY;
+
+    await this.accountsService.updateAccountAccesses(accountID, newAccesses);
+
+    return { error: false, ApiKey: APIKEY, accountID };
   }
 }

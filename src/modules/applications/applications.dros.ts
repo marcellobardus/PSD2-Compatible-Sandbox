@@ -25,4 +25,7 @@ export class ClaimAPIKeyDro {
 
   @ApiModelProperty()
   readonly apiKey: string;
+
+  @ApiModelProperty()
+  readonly accountID: number;
 }

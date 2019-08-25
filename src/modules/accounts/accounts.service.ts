@@ -3,7 +3,7 @@ import { Model } from 'mongoose';
 
 import { ACCOUNTS_SCHEMA_PROVIDER } from '../../utils/constants';
 
-import { AccountInterface } from './account.interface';
+import { AccountInterface, Access } from './account.interface';
 
 @Injectable()
 export class AccountsService {
@@ -32,18 +32,12 @@ export class AccountsService {
     return await this.accountModel.findOne({ accountID });
   }
 
-  async updateAccountAccesses(
-    accountID: number,
-    appID: string,
-    authorizationDate: number,
-    accessType: string,
-  ) {
-    const key = 'accesses.' + appID;
+  async updateAccountAccesses(accountID: number, newAccesses: Access) {
     await this.accountModel.updateOne(
       { accountID },
       {
         $set: {
-          [key]: { accessType, authorizationDate },
+          accesses: newAccesses,
         },
       },
     );

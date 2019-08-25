@@ -61,3 +61,46 @@ export class GetCustomerAccountsDro {
   @ApiModelProperty({ type: [Account] })
   readonly accounts: Account[];
 }
+
+export class RegisterAccountDro {
+  @ApiModelProperty()
+  readonly error: boolean;
+
+  @ApiModelProperty()
+  readonly accountID: number;
+
+  @ApiModelProperty()
+  readonly IBAN: string;
+}
+
+export class GetAccountInfoAsApplicationDro {
+  @ApiModelProperty()
+  readonly error: boolean;
+
+  @ApiModelProperty()
+  readonly accountID: number;
+
+  @ApiModelProperty()
+  readonly currency: string;
+
+  @ApiModelProperty()
+  readonly bookingBalance: number;
+
+  @ApiModelProperty()
+  readonly availableBalance: number;
+
+  @ApiModelProperty()
+  readonly accountNumber: string;
+
+  @ApiModelProperty()
+  readonly accountTypeDescription: string;
+
+  @ApiModelProperty()
+  readonly accountTypeCode: string;
+
+  @ApiModelProperty()
+  readonly accountTypeName: string;
+
+  @ApiModelProperty()
+  readonly accountNameClient: string;
+}

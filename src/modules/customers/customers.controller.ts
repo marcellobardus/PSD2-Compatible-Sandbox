@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Headers } from '@nestjs/common';
+import { Controller, Post, Body, Headers, Get } from '@nestjs/common';
 import { ApiUseTags, ApiResponse } from '@nestjs/swagger';
 
 import { CustomersService } from './customers.service';
@@ -104,4 +104,7 @@ export class CustomersController {
 
     return { error: false, session, expirationTime: sessionExpirationTime };
   }
+
+  @Get('customer-accounts-as-application')
+  async getCustomersAccountsAsApplication(@Headers('appID') appID: string) {}
 }
